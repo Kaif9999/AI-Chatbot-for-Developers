@@ -1,4 +1,245 @@
 # AI-Chatbot-for-Developers
+
+An intelligent chatbot system for developers with two implementations: a pattern-matching chatbot and an AI-powered transformer model chatbot.
+
+## Project Overview
+
+This project contains two different chatbot implementations:
+
+1. **Pattern-Matching Chatbot** (`chatbot.py`) - A rule-based chatbot using regular expressions
+2. **AI-Powered Chatbot** (`chatbot_model.py`) - A transformer-based chatbot using Microsoft Phi-2 model
+3. **Knowledge Base** (`pairs.py`) - Contains pattern-response pairs for the pattern-matching chatbot
+
+## Code Documentation
+
+### 1. Pattern-Matching Chatbot (`chatbot.py`)
+
+This is a rule-based chatbot that uses regular expressions to match user input with predefined patterns and provides appropriate responses.
+
+#### Architecture
+
+**Dependencies:**
+- `nltk` - Natural Language Toolkit for text processing
+- `re` - Regular expression pattern matching
+- `random` - Random response selection
+- `time` - Slow typing effect simulation
+- `pairs` - Custom module containing pattern-response database
+
+#### Core Functions
+
+##### `respond(user_input)` - Main Response Handler
+```python
+def respond(user_input):
+    user_input = user_input.lower()
+    user_input_tokens = nltk.word_tokenize(user_input)
+
+    for pattern, responses in pairs.pairs:
+        match = re.search(pattern, user_input)
+        if match:
+            return rd.choice(responses)
+
+    # Learning mechanism
+    new_question = input("Bot: Sorry I didn't understand...")
+    pairs.pairs.append([user_input, [new_question]])
+    with open("pairs.py", "w") as f:
+        f.write('pairs = ' + str(pairs.pairs))
+    return new_question
+```
+
+**Function Flow:**
+1. Converts user input to lowercase for case-insensitive matching
+2. Tokenizes the input using NLTK word tokenizer
+3. Iterates through pattern-response pairs from `pairs.py`
+4. Uses regex to find matching patterns
+5. Returns a random response from matching pattern's response list
+6. If no match found, prompts user to teach the bot
+7. Appends new pattern-response pair to database
+8. Persists the updated pairs to `pairs.py` file
+
+**Learning Capability:** The chatbot can learn from interactions by adding new patterns when it doesn't understand a query.
+
+##### `slow_print(text, delay=0.07)` - Typing Animation
+```python
+def slow_print(text, delay=0.07):
+    for char in text:
+        print(char, end='', flush=True)
+        time.sleep(delay)
+    print('')
+```
+
+**Purpose:** Creates a human-like typing effect by printing characters one at a time with a 70ms delay between each character.
+
+#### Main Loop (chatbot.py:37-44)
+```python
+while True:
+    user_input = input("Programmer: ")
+    if user_input.lower() == 'quit':
+        break
+    response = respond(user_input)
+    slow_print("KAI: " + response, delay=0.07)
+```
+
+Continuously accepts user input until 'quit' is entered, processes each input through the `respond()` function, and displays responses with the slow-typing effect.
+
+---
+
+### 2. AI-Powered Chatbot (`chatbot_model.py`)
+
+This implementation uses a transformer-based language model (Microsoft Phi-2) for generating intelligent, context-aware responses.
+
+#### Architecture
+
+**Dependencies:**
+- `transformers` - Hugging Face library for pre-trained models
+  - `AutoModelForCausalLM` - Causal language model loader
+  - `AutoTokenizer` - Tokenizer for text processing
+
+#### ChatbotModel Class
+
+##### `__init__(self, model_id)` - Constructor
+```python
+def __init__(self, model_id):
+    self.tokenizer = AutoTokenizer.from_pretrained(model_id)
+    self.model = AutoModelForCausalLM.from_pretrained(model_id, trust_remote_code=True)
+```
+
+**Initialization Process:**
+- Loads pre-trained tokenizer from Hugging Face Hub
+- Loads causal language model with `trust_remote_code=True` flag
+- Uses Microsoft Phi-2 model by default (`microsoft/phi-2`)
+
+##### `get_response_from_model(self, user_input)` - Text Generation
+```python
+def get_response_from_model(self, user_input):
+    try:
+        inputs = self.tokenizer(user_input, return_tensors="pt", max_length=128, truncation=True)
+        outputs = self.model.generate(**inputs, max_new_tokens=50)
+        return self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+    except Exception as e:
+        return f"Error processing user input: {str(e)}"
+```
+
+**Process Flow:**
+1. Tokenizes user input into PyTorch tensors
+2. Limits input to 128 tokens with truncation
+3. Generates up to 50 new tokens as response
+4. Decodes output tokens back to text
+5. Handles errors gracefully with error messages
+
+##### `handle_user_input(self, user_input)` - Main Handler
+Simple wrapper that calls `get_response_from_model()` and returns the model's response.
+
+#### Main Loop (chatbot_model.py:26-35)
+```python
+while True:
+    user_input = input("User: ")
+    if user_input.lower() in ["exit", "quit"]:
+        print("Goodbye!")
+        break
+    response = chatbot.handle_user_input(user_input)
+    print(f"Bot: {response}")
+```
+
+Accepts user input, checks for exit commands, generates AI responses, and displays them.
+
+---
+
+### 3. Knowledge Base (`pairs.py`)
+
+Contains the pattern-response database used by the pattern-matching chatbot.
+
+#### Structure
+
+Each entry is a list containing:
+1. **Pattern** - Regular expression string
+2. **Responses** - List of possible response strings
+
+#### Example Patterns
+
+**Greeting Pattern:**
+```python
+[r"hi|hey|hello", ["Hello", "Hey there"]]
+```
+Matches variations of greetings using OR operator (`|`)
+
+**Capture Group Pattern:**
+```python
+[r"my name is (.*)", ["Hello %l, How are you today?"]]
+```
+Captures any text after "my name is" using `(.*)` capture group
+
+**Python Knowledge Patterns:**
+```python
+[r"what is python ?", ["Python is a high-level, interpreted, general-purpose programming language."]]
+```
+
+#### Categories Covered:
+- Greetings and farewells
+- Identity questions (name, developer)
+- Python programming concepts (tuples, dictionaries, functions, inheritance)
+- Data structure comparisons
+- Recursive functions
+
+**Total Patterns:** 15+ predefined patterns covering basic conversation and Python programming topics.
+
+---
+
+## Key Differences Between Implementations
+
+| Feature | Pattern-Matching (`chatbot.py`) | AI-Powered (`chatbot_model.py`) |
+|---------|--------------------------------|--------------------------------|
+| **Response Method** | Regex pattern matching | Transformer model generation |
+| **Learning** | Adds new patterns dynamically | Pre-trained, no runtime learning |
+| **Response Quality** | Fixed, predefined responses | Context-aware, generated responses |
+| **Dependencies** | NLTK, regex | Transformers, PyTorch |
+| **Setup** | Lightweight, fast | Requires model download (~2.7GB) |
+| **Customization** | Easy to add patterns | Requires model fine-tuning |
+| **User Interface** | Slow-typing effect | Instant response |
+
+---
+
+## How the Code Works
+
+### Pattern-Matching Chatbot Flow
+1. User enters a question
+2. Input is normalized (lowercase) and tokenized
+3. System searches through regex patterns in `pairs.py`
+4. First matching pattern triggers random response selection
+5. If no match, system asks user to teach it
+6. New pattern-response pair is saved to `pairs.py`
+7. Response is displayed with typing animation
+
+### AI-Powered Chatbot Flow
+1. User enters a question
+2. Input is tokenized using Phi-2 tokenizer
+3. Tokens are fed to the transformer model
+4. Model generates contextual response (max 50 tokens)
+5. Output tokens are decoded to readable text
+6. Response is displayed instantly
+
+---
+
+## Installation and Usage
+
+### Prerequisites
+```bash
+pip install nltk transformers torch
+```
+
+### Running Pattern-Matching Chatbot
+```bash
+python chatbot.py
+```
+
+### Running AI-Powered Chatbot
+```bash
+python chatbot_model.py
+```
+
+---
+
+## Technical Implementation Details
+
 1. Import the required Python modules:
 ```
 import nltk
