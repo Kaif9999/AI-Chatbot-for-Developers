@@ -8,6 +8,7 @@ A Python-based chatbot project featuring two different implementations: a rule-b
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Testing](#testing)
 - [Code Documentation](#code-documentation)
   - [chatbot.py - Rule-Based Chatbot](#chatbotpy---rule-based-chatbot)
   - [chatbot_model.py - AI-Powered Chatbot](#chatbot_modelpy---ai-powered-chatbot)
@@ -35,6 +36,9 @@ AI-Chatbot-for-Developers/
 ├── chatbot.py           # Rule-based chatbot with NLTK
 ├── chatbot_model.py     # AI-powered chatbot with transformers
 ├── pairs.py             # Pattern-response pairs database
+├── test_chatbot.py      # Test suite for chatbot functionality
+├── requirements.txt     # Python dependencies
+├── .gitignore           # Git ignore patterns
 └── README.md            # Project documentation
 ```
 
@@ -69,6 +73,13 @@ python --version
 
 ### Install Dependencies
 
+**Quick Install (All Dependencies):**
+```bash
+pip install -r requirements.txt
+```
+
+**Or Install Individually:**
+
 **For Rule-Based Chatbot:**
 ```bash
 pip install nltk
@@ -83,6 +94,12 @@ pip install transformers torch
 ```python
 import nltk
 nltk.download('punkt')
+```
+
+### Run Tests
+```bash
+# Test the rule-based chatbot functionality
+python test_chatbot.py
 ```
 
 ---
@@ -488,6 +505,55 @@ outputs = self.model.generate(
 
 ---
 
+## 🧪 Testing
+
+The project includes a test suite to verify chatbot functionality.
+
+### Running Tests
+
+```bash
+python test_chatbot.py
+```
+
+### Test Coverage
+
+The test suite (`test_chatbot.py`) validates:
+- ✅ Greeting patterns (hi, hello, hey)
+- ✅ Python concept questions (tuples, dictionaries, functions)
+- ✅ Pattern matching accuracy
+- ✅ Response generation
+- ✅ Regular expression matching
+
+### Sample Test Output
+
+```
+============================================================
+Running Chatbot Tests
+============================================================
+✓ PASS: 'hello'
+  Response: Hello
+
+✓ PASS: 'what is python?'
+  Response: Python is a high-level, interpreted, general-purpose programming language.
+
+============================================================
+Test Results: 7 passed, 0 failed
+============================================================
+```
+
+### Adding New Tests
+
+Edit `test_chatbot.py` and add test cases to the `test_cases` list:
+
+```python
+test_cases = [
+    ("your question", ["expected response 1", "expected response 2"]),
+    # Add more test cases here
+]
+```
+
+---
+
 ## 🤝 Contributing
 
 Contributions are welcome! Here are some ideas:
@@ -499,6 +565,7 @@ Contributions are welcome! Here are some ideas:
 - Improve error handling
 - Add multi-language support
 - Implement context awareness
+- Expand test coverage
 
 ---
 

@@ -1,0 +1,8 @@
+# Requirements for AI Chatbot for Developers
+
+# Rule-based chatbot dependencies
+nltk>=3.8.1
+
+# AI-powered chatbot dependencies
+transformers>=4.35.0
+torch>=2.0.0
