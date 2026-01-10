@@ -8,6 +8,7 @@ A Python-based chatbot project with two implementations: a rule-based chatbot us
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
+- [Testing](#testing)
 - [Code Explanation](#code-explanation)
 - [How It Works](#how-it-works)
 - [Contributing](#contributing)
@@ -17,15 +18,19 @@ A Python-based chatbot project with two implementations: a rule-based chatbot us
 This project contains two chatbot implementations designed to answer Python programming questions:
 
 1. **Rule-Based Chatbot** (`chatbot.py`) - Uses pattern matching with regular expressions
-2. **AI-Powered Chatbot** (`chatbot_model.py`) - Uses Microsoft's Phi-2 transformer model
+2. **AI-Powered Chatbot** (`chatbot_model.py`) - Uses GPT-2 transformer model
 
 ## 📁 Project Structure
 
 ```
 AI-Chatbot-for-Developers/
 ├── chatbot.py              # Rule-based chatbot implementation
-├── chatbot_model.py        # AI-powered chatbot using Phi-2 model
+├── chatbot_model.py        # AI-powered chatbot using GPT-2 model
 ├── pairs.py                # Predefined question-answer patterns
+├── tests/
+│   ├── test_chatbot.py
+│   └── test_chatbot_model.py
+├── pytest.ini              # Pytest configuration
 ├── README.md               # Project documentation
 └── .github/
     └── workflows/
@@ -37,13 +42,10 @@ AI-Chatbot-for-Developers/
 ### Rule-Based Chatbot (chatbot.py)
 - ✅ Pattern matching using regular expressions
 - ✅ Predefined responses for common Python questions
-- ✅ Learning capability - adds new Q&A pairs when it doesn't understand
-- ✅ Slow typing effect for human-like responses
 - ✅ Case-insensitive input handling
-- ✅ Persistent learning (saves to pairs.py)
 
 ### AI-Powered Chatbot (chatbot_model.py)
-- ✅ Uses Microsoft Phi-2 transformer model
+- ✅ Uses GPT-2 transformer model
 - ✅ Natural language understanding
 - ✅ Context-aware responses
 - ✅ Handles complex queries
@@ -56,15 +58,8 @@ AI-Chatbot-for-Developers/
 - pip package manager
 
 ### Install Dependencies
-
-For **Rule-Based Chatbot**:
 ```bash
-pip install nltk
-```
-
-For **AI-Powered Chatbot**:
-```bash
-pip install transformers torch
+pip install nltk transformers torch pytest
 ```
 
 ### Download NLTK Data
@@ -93,7 +88,7 @@ Programmer: what is python?
 KAI: Python is a high-level, interpreted, general-purpose programming language.
 
 Programmer: quit
-Chat ended.
+Goodbye!
 ```
 
 ### Running the AI-Powered Chatbot
@@ -110,6 +105,12 @@ User: exit
 Goodbye!
 ```
 
+## 🧪 Testing
+To run the tests, use the following command:
+```bash
+pytest
+```
+
 ## 📖 Code Explanation
 
 ### 1. chatbot.py - Rule-Based Chatbot
@@ -117,98 +118,53 @@ Goodbye!
 #### Import Modules
 ```python
 import nltk
-import re
-import random as rd
-import pairs  # user defined module
-import time   # used to provide slow_typing
 from nltk.chat.util import Chat, reflections
+import pairs
 ```
 
 **Module Purposes:**
 - `nltk` - Natural Language Toolkit for text processing
-- `re` - Regular expressions for pattern matching
-- `random` - Generates random responses from multiple options
-- `pairs` - User-defined module containing Q&A patterns
-- `time` - Creates slow typing effect
 - `Chat, reflections` - NLTK utilities for chatbot functionality
+- `pairs` - User-defined module containing Q&A patterns
 
-#### Core Function: respond()
+#### Core Function: chatbot()
 ```python
-def respond(user_input):
-    user_input = user_input.lower()
-    user_input_tokens = nltk.word_tokenize(user_input)
-    
-    for pattern, responses in pairs.pairs:         
-        match = re.search(pattern, user_input)
-        if match:
-            return rd.choice(responses)
-        
-    new_question = input("Bot: Sorry I didn't understand. Can you provide the answer to \"" + user_input + "\"?")
-    pairs.pairs.append([user_input, [new_question]])
-    with open("pairs.py", "w") as f:
-        f.write('pairs = ' + str(pairs.pairs))
-    return new_question
+def chatbot():
+    """
+    This function is the main function for the chatbot.
+    """
+    print("Welcome to the Python Chatbot for Programmers!")
+    print("Ask me any questions about Python programming language.")
+    print("Enter 'quit' to exit the chatbot.")
+    chat = Chat(pairs.pairs, reflections)
+    while True:
+        user_input = input("Programmer: ")
+        if user_input.lower() == 'quit':
+            break
+        elif user_input:
+            response = chat.respond(user_input)
+            print("KAI:", response)
+    print("Goodbye!")
 ```
 
 **How it works:**
-1. **Standardization**: Converts input to lowercase for consistent matching
-2. **Tokenization**: Breaks input into individual words using `nltk.word_tokenize()`
-3. **Pattern Matching**: Iterates through predefined patterns in `pairs.py`
-4. **Response Selection**: If pattern matches, randomly selects a response
-5. **Learning Mode**: If no match found:
-   - Asks user for the correct answer
-   - Appends new pattern-response pair to `pairs.pairs`
-   - Saves updated pairs to `pairs.py` file
-   - Returns the user-provided answer
-
-#### Slow Typing Effect: slow_print()
-```python
-def slow_print(text, delay=0.07):
-    for char in text:
-        print(char, end='', flush=True)
-        time.sleep(delay)
-    print('')
-```
-
-**Purpose**: Creates a human-like typing effect by printing characters one at a time with a 0.07-second delay.
-
-#### Main Chatbot Loop
-```python
-print("Welcome to the Python Chatbot for Programmers!")
-print("Ask me any questions about Python programming language.")
-print("Enter 'quit' to exit the chatbot.")
-
-while True:
-    user_input = input("Programmer: ")
-    if user_input.lower() == 'quit':
-        break
-    response = respond(user_input)
-    slow_print("KAI: " + response, delay=0.07)
-
-print("Chat ended.")
-```
-
-**Flow:**
-1. Displays welcome message and instructions
-2. Enters infinite loop for continuous conversation
-3. Takes user input with "Programmer: " prompt
-4. Checks for 'quit' command to exit
-5. Processes input through `respond()` function
-6. Displays response with slow typing effect
-7. Repeats until user quits
+1. **Initialization**: Creates a `Chat` object with the patterns from `pairs.py` and reflections.
+2. **User Input**: Takes user input in a loop.
+3. **Response Generation**: Uses the `chat.respond()` method to find a matching pattern and return a response.
+4. **Exit**: Exits the loop when the user types "quit".
 
 ### 2. chatbot_model.py - AI-Powered Chatbot
 
 #### ChatbotModel Class
 ```python
 class ChatbotModel:
-    def __init__(self, model_id):
+    def __init__(self, model_id, max_length=128, max_new_tokens=50):
         self.tokenizer = AutoTokenizer.from_pretrained(model_id)
-        self.model = AutoModelForCausalLM.from_pretrained(model_id, trust_remote_code=True)
+        self.model = AutoModelForCausalLM.from_pretrained(model_id)
 ```
 
 **Initialization:**
-- Loads Microsoft Phi-2 model (`microsoft/phi-2`)
+- Loads GPT-2 model (`gpt2`)
 - Initializes tokenizer for text encoding/decoding
 - Loads causal language model for text generation
 
@@ -216,85 +172,58 @@ class ChatbotModel:
 ```python
 def get_response_from_model(self, user_input):
     try:
-        inputs = self.tokenizer(user_input, return_tensors="pt", max_length=128, truncation=True)
-        outputs = self.model.generate(**inputs, max_new_tokens=50)
+        inputs = self.tokenizer(user_input, return_tensors="pt", max_length=self.max_length, truncation=True)
+        outputs = self.model.generate(**inputs, max_new_tokens=self.max_new_tokens)
         return self.tokenizer.decode(outputs[0], skip_special_tokens=True)
-    except Exception as e:
+    except (ValueError, RuntimeError) as e:
         return f"Error processing user input: {str(e)}"
 ```
 
 **Process:**
-1. **Tokenization**: Converts text to model-readable format (max 128 tokens)
-2. **Generation**: Model generates up to 50 new tokens
+1. **Tokenization**: Converts text to model-readable format
+2. **Generation**: Model generates new tokens based on the input
 3. **Decoding**: Converts tokens back to human-readable text
 4. **Error Handling**: Returns error message if processing fails
 
 #### User Interaction Loop
 ```python
-while True:
-    user_input = input("User: ")
+def main():
+    # Model ID
+    model_id = "gpt2"
+    chatbot = ChatbotModel(model_id)
+
+    # User input loop
+    while True:
+        user_input = input("User: ")
+        
+        # Exit the loop if the user wants to quit
+        if user_input.lower() in ["exit", "quit"]:
+            print("Goodbye!")
+            break
     
-    if user_input.lower() in ["exit", "quit"]:
-        print("Goodbye!")
-        break
-   
-    response = chatbot.handle_user_input(user_input)
-    print(f"Bot: {response}")
+        response = chatbot.handle_user_input(user_input)
+        print(f"Bot: {response}")
 ```
 
 **Features:**
 - Continuous conversation loop
 - Multiple exit commands ("exit" or "quit")
-- Direct response display without typing effect
+- Direct response display
 
 ### 3. pairs.py - Pattern-Response Database
 
-Contains predefined regex patterns and corresponding responses:
-
-```python
-pairs = [
-    [r"my name is (.*)", ["Hello %l, How are you today?"]],
-    [r"hi|hey|hello", ["Hello", "Hey there"]],
-    [r"what is python ?", ["Python is a high-level, interpreted, general-purpose programming language."]],
-    # ... more patterns
-]
-```
-
-**Pattern Types:**
-- **Greeting patterns**: `r"hi|hey|hello"`
-- **Question patterns**: `r"what is python ?"`
-- **Capture groups**: `r"my name is (.*)"` - captures user's name
-- **Multiple responses**: Bot randomly selects from response list
-
-**Supported Topics:**
-- Python basics (features, syntax)
-- Data structures (lists, tuples, dictionaries)
-- Functions and recursion
-- Object-oriented programming (inheritance)
-- Bot information (name, developer)
+Contains predefined regex patterns and corresponding responses for the rule-based chatbot.
 
 ## 🔧 How It Works
 
 ### Rule-Based Chatbot Workflow
 ```
-User Input → Lowercase Conversion → Tokenization → Pattern Matching
-                                                          ↓
-                                                    Match Found?
-                                                    ↙         ↘
-                                                  Yes         No
-                                                   ↓           ↓
-                                          Random Response   Ask User
-                                                   ↓           ↓
-                                          Display Response  Learn & Save
+User Input → Pattern Matching → Response Selection → Display Response
 ```
 
 ### AI-Powered Chatbot Workflow
 ```
-User Input → Tokenization → Model Processing → Token Generation
-                                                      ↓
-                                              Decode to Text
-                                                      ↓
-                                              Display Response
+User Input → Tokenization → Model Processing → Token Generation → Decode to Text → Display Response
 ```
 
 ## 🎯 Key Differences
@@ -302,7 +231,7 @@ User Input → Tokenization → Model Processing → Token Generation
 | Feature | Rule-Based (chatbot.py) | AI-Powered (chatbot_model.py) |
 |---------|------------------------|-------------------------------|
 | **Approach** | Pattern matching | Neural network |
-| **Learning** | Manual (user teaches) | Pre-trained model |
+| **Learning** | None | Pre-trained model |
 | **Flexibility** | Limited to patterns | Handles varied inputs |
 | **Setup** | Lightweight | Requires model download |
 | **Response Time** | Instant | Slower (model inference) |
@@ -329,15 +258,13 @@ Developed by **Kaif**
 
 ## 🐛 Known Issues
 
-- Rule-based chatbot overwrites `pairs.py` when learning (formatting may change)
-- AI model requires significant memory (Phi-2 is ~2.7GB)
+- AI model requires significant memory (GPT-2 is smaller than Phi-2, but still requires resources)
 - No conversation history tracking
-- Learning feature in rule-based chatbot requires manual input
 
 ## 🔮 Future Enhancements
 
 - [ ] Add conversation context memory
-- [ ] Implement database storage for learned patterns
+- [ ] Implement database storage for patterns
 - [ ] Create web interface using Flask/FastAPI
 - [ ] Add multi-language support
 - [ ] Implement sentiment analysis
