@@ -1,3 +1,44 @@
+# AI Chatbot for Developers
+
+This project contains two different implementations of a chatbot:
+
+1.  A rule-based chatbot using NLTK and regular expressions (`chatbot.py`).
+2.  A model-based chatbot using the `transformers` library and the "microsoft/phi-2" model (`chatbot_model.py`).
+
+## Files
+
+### `chatbot_model.py`
+
+This script implements a chatbot using a pre-trained language model from the Hugging Face `transformers` library.
+
+**Functionality:**
+
+*   It uses the `microsoft/phi-2` model, a powerful small language model.
+*   The `ChatbotModel` class handles loading the model and tokenizer, processing user input, and generating responses from the model.
+*   The script runs an interactive loop where the user can chat with the model.
+
+**How to Run:**
+
+1.  Make sure you have the required libraries installed:
+    ```bash
+    pip install transformers torch
+    ```
+2.  Run the script:
+    ```bash
+    python chatbot_model.py
+    ```
+
+### `pairs.py`
+
+This file contains the data for the rule-based chatbot (`chatbot.py`). It is a list of lists, where each inner list defines a pattern and a set of possible responses.
+
+*   **Pattern**: A regular expression that matches user input.
+*   **Responses**: A list of possible responses that the chatbot can choose from if the pattern is matched.
+
+The `chatbot.py` script can dynamically add new pairs to this file based on user interaction.
+
+---
+
 # AI-Chatbot-for-Developers
 1. Import the required Python modules:
 ```
