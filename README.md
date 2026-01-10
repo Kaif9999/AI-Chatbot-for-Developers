@@ -1,116 +1,255 @@
-# AI-Chatbot-for-Developers
-1. Import the required Python modules:
+# AI Chatbot for Developers
+
+A Python-based conversational chatbot designed to answer programming-related questions, with two implementation approaches: a rule-based pattern matching system and a transformer-based AI model.
+
+## 📋 Overview
+
+This project contains two chatbot implementations:
+
+1. **Rule-Based Chatbot** (`chatbot.py`) - Uses NLTK and regex pattern matching with a self-learning capability
+2. **AI Model Chatbot** (`chatbot_model.py`) - Uses Microsoft's Phi-2 transformer model for natural language understanding
+
+## 🚀 Features
+
+### Rule-Based Chatbot (`chatbot.py`)
+- **Pattern Matching**: Uses regular expressions to match user queries
+- **Self-Learning**: Learns from user interactions by storing new question-answer pairs
+- **Slow Typing Effect**: Simulates human-like typing for responses
+- **Persistent Storage**: Saves learned patterns to `pairs.py` for future sessions
+- **Python Programming Focus**: Pre-configured with Python programming Q&A pairs
+
+### AI Model Chatbot (`chatbot_model.py`)
+- **Transformer-Based**: Powered by Microsoft Phi-2 model
+- **Natural Language Understanding**: Handles complex conversational queries
+- **Error Handling**: Graceful error management for model processing
+- **Token Management**: Configurable input/output token limits
+
+## 📦 Installation
+
+### Prerequisites
+- Python 3.8, 3.9, or 3.10
+- pip package manager
+
+### Dependencies
+
+Install required packages:
+
+```bash
+pip install nltk transformers torch
 ```
+
+For NLTK, you'll also need to download the tokenizer data:
+
+```python
 import nltk
-import re
-import random as rd
-import pairs #user defined module
-import time  #used to provide slow_typing
-from nltk.chat.util import Chat, reflections
+nltk.download('punkt')
 ```
-*The **nltk module** is used for natural language processing. 
 
-*The **re module** is used for regular expressions.
+## 🎯 Usage
 
-*The **random module** is used for generating random responses.
+### Running the Rule-Based Chatbot
 
-*The **pairs module** is a user-defined module that contains the pairs of patterns and responses for the chatbot.
-
-*The **time module** is used to provide a slow typing effect.
-
-*The **Chat and reflections** modules are imported from nltk.chat.util.
-
-2. Define a `respond` function that takes user input and returns a response based on the provided pairs of patterns and responses.
+```bash
+python chatbot.py
 ```
-def respond(user_input):
-    # Convert user input to lower case for standardization
-    user_input = user_input.lower()
-    
-    # Tokenize the user input
-    user_input_tokens = nltk.word_tokenize(user_input)
-    
-    for pattern, responses in pairs.pairs:         
-        match = re.search(pattern, user_input)
-        if match:
-            return rd.choice(responses)
-        
-    new_question = input("Bot: Sorry I didn't understand. Can you provide the answer to \"" + user_input + "\"?")
-    pairs.pairs.append([user_input, [new_question]])
-    with open("pairs.py", "w") as f:
-        f.write('pairs = ' + str(pairs.pairs))
-    return new_question
+
+**Interaction Example:**
 ```
-    
-*The `respond` function takes a `user_input` parameter, which is the input provided by the user.
+Welcome to the Python Chatbot for Programmers!
+Ask me any questions about Python programming language.
+Enter 'quit' to exit the chatbot.
 
-*The `user_input` is converted to lower case to standardize the input.
+Programmer: what is python?
+KAI: Python is a high-level, interpreted, general-purpose programming language.
 
-*The `nltk.word_tokenize` function is used to tokenize the user input into words.
+Programmer: quit
+Chat ended.
+```
 
-*A `for` loop is used to iterate through the `pairs` list of patterns and responses.
+### Running the AI Model Chatbot
 
-*The `re.search` function is used to find a match between the user input and the pattern in each pair.
+```bash
+python chatbot_model.py
+```
 
-*If a match is found, a random response is chosen from the list of responses in the pair using the `rd.choice` function.
+**Interaction Example:**
+```
+User: Hello, how are you?
+Bot: [AI-generated response]
 
-*If no match is found, the chatbot asks the user for a response and appends the user's response to the `pairs` list of patterns and responses.
+User: exit
+Goodbye!
+```
 
-*The updated `pairs` list is then written to a file called pairs.py.
-
-*The function returns the user's response.
-
-3. Define a `slow_print` function that takes a string and prints it with a delay effect.
+## 📁 Project Structure
 
 ```
-def slow_print(text, delay=0.07):
-    for char in text:
-        print(char, end='', flush=True)
-        time.sleep(delay)
-    print('')
+.
+├── chatbot.py              # Rule-based chatbot with pattern matching
+├── chatbot_model.py        # Transformer-based AI chatbot
+├── pairs.py                # Pattern-response pairs database
+├── README.md               # Project documentation
+├── .github/
+│   └── workflows/
+│       └── python-package.yml  # CI/CD pipeline configuration
+└── .git/                   # Git repository
 ```
-*The `slow_print` function takes a `text` parameter, which is the string to be printed.
 
-*The function also takes an optional `delay` parameter that sets the time delay between printing each character.
+## 🔧 Core Components
 
-*A `for` loop is used to iterate through each character in the string.
+### 1. `chatbot.py` - Rule-Based Implementation
 
-*The `print` function is used to print each character with the `end=''` parameter to prevent the cursor from going to the next line.
+**Key Functions:**
 
-*The `time.sleep` function is used to introduce a delay between printing each character.
-*After printing all the characters, the `print` function is used to go to the next line.
+- **`respond(user_input)`**: 
+  - Converts input to lowercase
+  - Tokenizes the input using NLTK
+  - Searches for matching patterns in the pairs database
+  - Returns a random response from matched patterns
+  - If no match found, prompts user to teach the bot and saves the new pair
 
-4. Print the welcome message and start the chatbot loop.
+- **`slow_print(text, delay=0.07)`**:
+  - Prints text character by character with a delay
+  - Creates a typing effect for more natural interaction
 
+**Self-Learning Mechanism:**
+When the bot doesn't understand a query, it:
+1. Asks the user for the correct answer
+2. Appends the new pattern-response pair to the database
+3. Writes the updated pairs to `pairs.py`
+4. Uses the new knowledge in future conversations
+
+### 2. `chatbot_model.py` - AI Model Implementation
+
+**Key Components:**
+
+- **`ChatbotModel` Class**:
+  - `__init__(model_id)`: Initializes tokenizer and model
+  - `get_response_from_model(user_input)`: Generates AI responses
+  - `handle_user_input(user_input)`: Processes user queries
+
+**Model Configuration:**
+- Model: `microsoft/phi-2`
+- Max input length: 128 tokens
+- Max new tokens: 50
+- Truncation: Enabled
+
+### 3. `pairs.py` - Knowledge Database
+
+Contains regex patterns and corresponding responses for:
+- Greetings and introductions
+- Python programming concepts (tuples, dictionaries, functions)
+- Object-oriented programming (inheritance)
+- Data structures (lists vs tuples)
+- Recursive functions
+- Bot information and metadata
+
+## 🧪 Testing
+
+The project includes GitHub Actions CI/CD pipeline that:
+- Tests on Python 3.8, 3.9, and 3.10
+- Runs flake8 linting
+- Executes pytest tests
+- Triggers on push/pull requests to main branch
+
+Run tests locally:
+```bash
+pytest
 ```
-print("Welcome to the Python Chatbot for Programmers!")
-print("Ask me any questions about Python programming language.")
-print("Enter 'quit' to exit the chatbot.")
 
-while True:
-    user_input = input("Programmer: ")
-    if user_input.lower() == 'quit':
-        break
-    response = respond(user_input)
-    slow_print("KAI: " + response, delay=0.07)
-
-print("Chat ended.")
+Run linting:
+```bash
+flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
 ```
-*This block of code initializes and runs the chatbot application. It first welcomes the user and provides instructions on how to interact with the chatbot. It then enters into a loop where it continuously takes the user's input and passes it to the `respond(user_input)` function to get a response. It prints the response using the `slow_print(text, delay)` function to simulate the effect of a slow-typing chatbot. The loop continues until the user enters the keyword 'quit', at which point the chatbot application ends.
 
-5. Respond Function
-The `respond` function is the core of the chatbot. It takes a string input, tokenizes it, and searches for a matching regular expression pattern in the `pairs` list. If a pattern is found, a random response is returned from the corresponding list of responses. If no pattern is found, the function prompts the user to provide an answer for the given input and adds it to the `pairs` list. The function then writes the updated `pairs` list to the `pairs.py` file and returns the new question.
+## 🎨 Customization
 
-6. Slow Typing Function
-The `slow_print` function is a helper function that prints text slowly, with a default delay of 0.07 seconds per character. This function is used to simulate a more human-like chatbot response time.
+### Adding New Patterns (Rule-Based Bot)
 
-7. Chatbot Interaction Loop
-The main program loop uses a `while` loop to continuously prompt the user for input until the user enters the keyword "quit". Each user input is passed to the `respond` function, and the resulting response is printed to the console using the `slow_print` function.
+Edit `pairs.py` and add new pattern-response pairs:
 
-8. User-Defined Regular Expressions and Responses
-The `pairs` list contains a set of user-defined regular expressions and their corresponding responses. These regular expressions and responses are used by the respond function to generate appropriate responses for the user's input.
+```python
+[
+    r"your regex pattern here",
+    ["Response 1", "Response 2", "Response 3"]
+]
+```
 
-The AI Chatbot project is a simple yet effective demonstration of natural language processing and regular expressions. It provides a basic level of interaction between the user and the chatbot, with the ability to learn and adapt to new user inputs. By modifying the `pairs` list and adding new regular expressions and responses, the chatbot can be easily extended to handle a wider range of user inputs and provide more intelligent responses.
+### Changing the AI Model
 
+Modify the `model_id` in `chatbot_model.py`:
 
+```python
+model_id = "your-preferred-model"  # e.g., "gpt2", "facebook/opt-350m"
+```
 
+## 🛠️ Technical Details
 
+### Pattern Matching
+- Uses Python's `re` module for regex matching
+- Case-insensitive matching (converts input to lowercase)
+- Supports capture groups with `%l` placeholder
+
+### Tokenization
+- NLTK's `word_tokenize` for text processing
+- Transformers' `AutoTokenizer` for AI model input
+
+### Response Generation
+- Random selection from multiple possible responses
+- AI model uses causal language modeling for generation
+
+## 🚦 Exit Commands
+
+**Rule-Based Bot**: `quit`
+
+**AI Model Bot**: `exit` or `quit`
+
+## ⚠️ Known Limitations
+
+1. **Rule-Based Bot**:
+   - Limited to predefined patterns
+   - Requires exact or close pattern matches
+   - Self-learning requires manual user input
+
+2. **AI Model Bot**:
+   - Requires significant computational resources
+   - First run downloads the model (~5GB for Phi-2)
+   - Response quality depends on model capabilities
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Run tests and linting
+5. Submit a pull request
+
+## 📝 License
+
+This project is open source and available for educational purposes.
+
+## 👨‍💻 Developer
+
+Developed by Kaif
+
+## 🔮 Future Enhancements
+
+- [ ] Add conversation history tracking
+- [ ] Implement context-aware responses
+- [ ] Add multi-language support
+- [ ] Create web interface
+- [ ] Add voice interaction capabilities
+- [ ] Implement sentiment analysis
+- [ ] Add database backend for scalable storage
+- [ ] Create REST API endpoints
+
+## 📚 Resources
+
+- [NLTK Documentation](https://www.nltk.org/)
+- [Hugging Face Transformers](https://huggingface.co/docs/transformers/)
+- [Microsoft Phi-2 Model](https://huggingface.co/microsoft/phi-2)
+- [Python Regular Expressions](https://docs.python.org/3/library/re.html)
+
+---
+
+**Note**: This chatbot is designed for educational purposes and demonstrates both traditional NLP techniques and modern transformer-based approaches to conversational AI.
